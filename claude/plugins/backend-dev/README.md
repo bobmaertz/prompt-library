@@ -6,7 +6,8 @@ Configuration references and tooling for backend development workflows. Focuses 
 
 | Path | Purpose |
 |------|---------|
-| `config/lsp-settings.md` | LSP server settings reference for common languages |
+| `.lsp.json` | Machine-readable LSP server configurations loaded by Claude Code (TypeScript, Python, Go, Rust, Bash) |
+| `config/lsp-settings.md` | Human-readable editor setup reference (VS Code / Neovim settings) for the same language servers |
 | `config/linters.md` | Linter configuration templates and conventions |
 
 ## Philosophy

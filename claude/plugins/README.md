@@ -22,7 +22,8 @@ Each plugin follows this internal layout:
 │   └── <skill-name>/
 │       └── SKILL.md
 ├── hooks/              # Event-driven hooks (pre-commit, post-tool, etc.)
-│   └── *.md
+│   ├── *.md            # Markdown-based hooks
+│   └── hooks.json      # JSON hook definitions for event-driven hooks
 └── config/             # Reference configs, templates, settings
     └── *.md
 ```

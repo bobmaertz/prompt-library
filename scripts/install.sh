@@ -170,9 +170,9 @@ install_claude() {
                 done
             fi
 
-            # Plugin hooks (hooks.json merged into claude settings hooks dir)
+            # Plugin hooks (hooks.json symlinked into Claude settings hooks dir)
             if [ -f "$plugin/hooks/hooks.json" ]; then
-                local hooks_dir="$CLAUDE_CONFIG_DIR/hooks/plugins"
+                hooks_dir="$CLAUDE_CONFIG_DIR/hooks/plugins"
                 if [ ! -d "$hooks_dir" ]; then
                     mkdir -p "$hooks_dir"
                     print_info "Created directory: $hooks_dir"

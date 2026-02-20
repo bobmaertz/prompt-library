@@ -62,7 +62,7 @@ fi
 # Confirm
 echo ""
 gum style --foreground 212 "Research query:"
-echo "$PROMPT"
+echo -e "$PROMPT"
 echo ""
 
 if gum confirm "Start research?"; then

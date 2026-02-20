@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Check if the Bash command about to run is a git commit command (contains 'git commit'). If it is, verify whether a peer-review has been completed for the staged changes in this session. If a peer-review finding was produced and showed Critical or Major issues that have not been addressed, block the commit and explain which findings need resolution first. If review was clean, approved, or not yet run (in which case remind the user to run /peer-review), allow the commit. Return your decision.",
+            "prompt": "Check if the Bash command about to run is a git commit command (contains 'git commit'). If it is, verify whether a peer-review has been completed for the staged changes in this session. If a peer-review finding was produced and showed Critical or Major issues that have not been addressed, block the commit and explain which findings need resolution first. If review was clean, approved, or not yet run (in which case remind the user to run /peer-review), allow the commit. Respond with either 'ALLOW' or 'BLOCK' followed by a brief explanation, in the format: DECISION: <ALLOW|BLOCK> - <reason>.",
             "timeout": 30
           }
         ]
