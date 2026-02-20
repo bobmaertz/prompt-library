@@ -5,8 +5,6 @@
   "author": {
     "name": "bobmaertz"
   },
-  "repository": {
-    "url": "https://github.com/bobmaertz/prompt-library"
-  },
+  "repository": "https://github.com/bobmaertz/prompt-library",
   "license": "MIT"
 }
