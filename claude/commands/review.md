@@ -1,5 +1,8 @@
 ---
-description: Review code changes for quality, security, and best practices
+name: review
+description: Quick all-in-one review of recent code changes covering quality, security, best practices, and performance. For deep specialized reviews use /peer-review or /security-review instead.
+argument-hint: [optional: file paths or scope]
+allowed-tools: Grep, Glob, Read, Bash
 ---
 
 Please review the recent code changes in this repository:
