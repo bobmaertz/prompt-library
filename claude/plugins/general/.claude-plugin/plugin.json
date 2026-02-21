@@ -1,5 +1,5 @@
 {
-  "name": "general-purpose",
+  "name": "general",
   "description": "Core utilities for everyday Claude Code workflows: deep research with parallel sub-agents, gum-based interactive CLI helpers, and general-purpose tools.",
   "version": "0.1.0",
   "author": {

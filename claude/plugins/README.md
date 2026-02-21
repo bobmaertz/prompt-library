@@ -6,9 +6,9 @@ A plugin is a self-contained collection of related commands, skills, hooks, and 
 
 ```
 claude/plugins/
-├── general-purpose/    # Research commands, gum helpers, general utilities
-├── backend-dev/        # LSP config, linters, backend-focused tooling
-└── code-review/        # Peer review and security review agents
+├── general/    # Research commands, gum helpers, general utilities
+├── backend/    # LSP config, linters, backend-focused tooling
+└── review/     # Peer review and security review agents
 ```
 
 Each plugin follows this internal layout:
@@ -45,6 +45,6 @@ Plugins are installed flat — meaning a skill at `code-review/skills/peer-revie
 
 | Plugin | Purpose |
 |--------|---------|
-| `general-purpose` | Research workflows, gum-based CLI helpers, general utilities |
-| `backend-dev` | LSP configuration, linter setup, backend development tooling |
-| `code-review` | Peer review and security review as background agents |
+| `general` | Research workflows, gum-based CLI helpers, general utilities |
+| `backend` | LSP configuration, linter setup, backend development tooling |
+| `review` | Peer review and security review as background agents |
