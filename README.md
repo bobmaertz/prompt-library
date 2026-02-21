@@ -6,14 +6,32 @@ A collection of Claude Code plugins for everyday development workflows. Each plu
 
 | Plugin | Description |
 |--------|-------------|
-| [`general`](plugins/general/) | Research, repository exploration, and documentation generation |
-| [`review`](plugins/review/) | Code review: quick, peer, and security review agents with pre-commit hooks |
-| [`git`](plugins/git/) | Git commit message generation and worktree management |
+| [`general`](plugins/general/) | Research, repo exploration, docs, code review, security review, and git workflow |
 | [`backend`](plugins/backend/) | LSP server configuration and linter templates |
 
 ## Installation
 
-Clone the repository and run the installer. It symlinks each plugin into the Claude Code plugin cache and registers it in `~/.claude/settings.json`.
+### Native install (recommended)
+
+First add this repository as a Claude Code marketplace, then install the plugins you want:
+
+```bash
+# Add this repo as a marketplace (one-time)
+/plugin marketplace add https://github.com/bobmaertz/prompt-library
+
+# Install plugins
+claude plugin install general
+claude plugin install backend
+
+# Or install to project scope to share with your team
+claude plugin install general --scope project
+```
+
+Uninstall with `claude plugin uninstall <name>`.
+
+### Symlink install (for contributors)
+
+If you want edits to sync back to the repository automatically, clone it and use the install script instead. This symlinks each plugin directory into the Claude Code plugin cache rather than copying it.
 
 ```bash
 git clone https://github.com/bobmaertz/prompt-library.git ~/.claude-plugins
@@ -21,34 +39,24 @@ cd ~/.claude-plugins
 ./scripts/install.sh
 ```
 
-Each plugin is installed as a symlink so edits made through Claude Code sync back to this repository automatically.
-
 | What | Where |
 |------|-------|
 | Plugin symlinks | `~/.claude/plugins/cache/<plugin-name>` |
-| Settings registration | `~/.claude/settings.json` → `enabledPlugins` |
-
-Override the default `~/.claude` path:
+| Settings entry | `~/.claude/settings.json` → `enabledPlugins` |
 
 ```bash
+# Uninstall
+./scripts/uninstall.sh
+
+# Override the default ~/.claude path
 CLAUDE_DIR=/custom/path ./scripts/install.sh
 ```
 
-### Development / testing a single plugin
-
-To load a plugin for one session without installing it permanently:
+### Testing a single plugin without installing
 
 ```bash
-claude --plugin-dir ./plugins/review
+claude --plugin-dir ./plugins/general
 ```
-
-## Uninstallation
-
-```bash
-./scripts/uninstall.sh
-```
-
-Removes the cache symlinks and deregisters each plugin from `settings.json`. Backup files are left in place.
 
 ## Plugin Structure
 
@@ -84,9 +92,9 @@ Every plugin follows this layout:
 4. Write a `README.md` describing commands and usage
 5. Run `./scripts/install.sh` to pick up the new plugin
 
-## Syncing Across Machines
+## Syncing Across Machines (symlink install)
 
-Because installation uses symlinks, any change made through either the config directory or the repository is immediately reflected in both. To sync across machines:
+Because the cache entries are symlinks, edits made through Claude Code write back to this repository. To sync across machines:
 
 ```bash
 # Push from one machine
@@ -94,7 +102,7 @@ git add -A && git commit -m "Update plugins" && git push
 
 # Pull on another machine
 git pull
-./scripts/install.sh   # only needed for new plugins
+./scripts/install.sh   # only needed when adding new plugins
 ```
 
 ## License
