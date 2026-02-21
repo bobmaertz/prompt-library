@@ -1,0 +1,30 @@
+{
+  "name": "prompt-library",
+  "owner": {
+    "name": "bobmaertz"
+  },
+  "plugins": [
+    {
+      "name": "general",
+      "source": "./plugins/general",
+      "description": "General-purpose Claude Code plugin: research, repository exploration, documentation generation, code review agents, security review, git commit generation, and git worktree management.",
+      "version": "0.1.0",
+      "author": {
+        "name": "bobmaertz"
+      },
+      "repository": "https://github.com/bobmaertz/prompt-library",
+      "license": "MIT"
+    },
+    {
+      "name": "backend",
+      "source": "./plugins/backend",
+      "description": "Backend development tooling for Claude Code: LSP server configuration and linter templates for TypeScript, Python, Go, Rust, and Shell.",
+      "version": "0.1.0",
+      "author": {
+        "name": "bobmaertz"
+      },
+      "repository": "https://github.com/bobmaertz/prompt-library",
+      "license": "MIT"
+    }
+  ]
+}
