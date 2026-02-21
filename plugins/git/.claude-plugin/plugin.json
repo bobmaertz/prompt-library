@@ -1,7 +1,7 @@
 {
   "name": "git",
   "description": "Git workflow automation for Claude Code: context-aware commit message generation and worktree management for parallel agent workflows.",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "author": {
     "name": "bobmaertz"
   },
