@@ -1,0 +1,120 @@
+{
+  "typescript": {
+    "command": "typescript-language-server",
+    "args": ["--stdio"],
+    "extensionToLanguage": {
+      ".ts": "typescript",
+      ".tsx": "typescriptreact",
+      ".mts": "typescript",
+      ".cts": "typescript"
+    },
+    "initializationOptions": {
+      "preferences": {
+        "importModuleSpecifier": "relative",
+        "quotePreference": "single",
+        "includeInlayParameterNameHints": "literals",
+        "includeInlayVariableTypeHints": true,
+        "includeInlayFunctionLikeReturnTypeHints": true
+      }
+    },
+    "restartOnCrash": true,
+    "maxRestarts": 5
+  },
+  "javascript": {
+    "command": "typescript-language-server",
+    "args": ["--stdio"],
+    "extensionToLanguage": {
+      ".js": "javascript",
+      ".jsx": "javascriptreact",
+      ".mjs": "javascript",
+      ".cjs": "javascript"
+    },
+    "initializationOptions": {
+      "preferences": {
+        "quotePreference": "single"
+      }
+    },
+    "restartOnCrash": true,
+    "maxRestarts": 5
+  },
+  "python": {
+    "command": "pyright-langserver",
+    "args": ["--stdio"],
+    "extensionToLanguage": {
+      ".py": "python",
+      ".pyi": "python"
+    },
+    "settings": {
+      "python": {
+        "analysis": {
+          "typeCheckingMode": "strict",
+          "autoSearchPaths": true,
+          "useLibraryCodeForTypes": true,
+          "autoImportCompletions": true
+        }
+      }
+    },
+    "restartOnCrash": true,
+    "maxRestarts": 5
+  },
+  "go": {
+    "command": "gopls",
+    "args": ["serve"],
+    "extensionToLanguage": {
+      ".go": "go"
+    },
+    "settings": {
+      "gopls": {
+        "analyses": {
+          "unusedparams": true,
+          "shadow": true,
+          "fieldalignment": true
+        },
+        "staticcheck": true,
+        "gofumpt": true,
+        "ui.semanticTokens": true
+      }
+    },
+    "restartOnCrash": true,
+    "maxRestarts": 5
+  },
+  "rust": {
+    "command": "rust-analyzer",
+    "extensionToLanguage": {
+      ".rs": "rust"
+    },
+    "settings": {
+      "rust-analyzer": {
+        "checkOnSave": {
+          "command": "clippy",
+          "extraArgs": ["--", "-W", "clippy::all"]
+        },
+        "inlayHints": {
+          "typeHints": { "enable": true },
+          "parameterHints": { "enable": true },
+          "chainingHints": { "enable": true }
+        }
+      }
+    },
+    "restartOnCrash": true,
+    "maxRestarts": 5
+  },
+  "bash": {
+    "command": "bash-language-server",
+    "args": ["start"],
+    "extensionToLanguage": {
+      ".sh": "shellscript",
+      ".bash": "shellscript",
+      ".zsh": "shellscript"
+    },
+    "settings": {
+      "bashIde": {
+        "shellcheckPath": "shellcheck",
+        "enableSourceErrorDiagnostics": true,
+        "globPattern": "**/*@(.sh|.inc|.bash|.command)"
+      }
+    },
+    "restartOnCrash": true,
+    "maxRestarts": 3
+  }
+}

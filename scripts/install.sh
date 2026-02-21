@@ -137,6 +137,54 @@ install_claude() {
             "$CLAUDE_CONFIG_DIR/prompts" \
             "Claude prompts directory"
     fi
+
+    # Install plugins
+    if [ -d "$PROMPT_LIB_DIR/claude/plugins" ]; then
+        for plugin in "$PROMPT_LIB_DIR/claude/plugins"/*/; do
+            if [ ! -d "$plugin" ]; then continue; fi
+            plugin_name=$(basename "$plugin")
+
+            # Plugin skills
+            if [ -d "$plugin/skills" ]; then
+                for skill in "$plugin/skills"/*/; do
+                    if [ -d "$skill" ]; then
+                        skill_name=$(basename "$skill")
+                        create_symlink \
+                            "$skill" \
+                            "$CLAUDE_CONFIG_DIR/skills/$skill_name" \
+                            "Claude skill ($plugin_name): $skill_name"
+                    fi
+                done
+            fi
+
+            # Plugin commands
+            if [ -d "$plugin/commands" ]; then
+                for command in "$plugin/commands"/*; do
+                    if [ -f "$command" ]; then
+                        command_name=$(basename "$command")
+                        create_symlink \
+                            "$command" \
+                            "$CLAUDE_CONFIG_DIR/commands/$command_name" \
+                            "Claude command ($plugin_name): $command_name"
+                    fi
+                done
+            fi
+
+            # Plugin hooks (hooks.json symlinked into Claude settings hooks dir)
+            if [ -f "$plugin/hooks/hooks.json" ]; then
+                hooks_dir="$CLAUDE_CONFIG_DIR/hooks/plugins"
+                if [ ! -d "$hooks_dir" ]; then
+                    mkdir -p "$hooks_dir"
+                    print_info "Created directory: $hooks_dir"
+                fi
+                create_symlink \
+                    "$plugin/hooks/hooks.json" \
+                    "$hooks_dir/$plugin_name.json" \
+                    "Claude hooks ($plugin_name)"
+            fi
+        done
+        print_success "Plugins installed"
+    fi
 }
 
 # Function to install Cursor resources
@@ -187,6 +235,9 @@ show_summary() {
     fi
     if [ -d "$CLAUDE_CONFIG_DIR/hooks" ]; then
         echo "  Hooks: $(find "$CLAUDE_CONFIG_DIR/hooks" -type l 2>/dev/null | wc -l) symlinked"
+    fi
+    if [ -d "$CLAUDE_CONFIG_DIR/hooks/plugins" ]; then
+        echo "  Plugin hooks: $(find "$CLAUDE_CONFIG_DIR/hooks/plugins" -type l 2>/dev/null | wc -l) symlinked"
     fi
 
     echo ""

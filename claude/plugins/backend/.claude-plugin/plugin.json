@@ -1,0 +1,11 @@
+{
+  "name": "backend",
+  "description": "Backend development tooling for Claude Code: LSP server configuration and linter templates for TypeScript, Python, Go, Rust, and Shell.",
+  "version": "0.1.0",
+  "author": {
+    "name": "bobmaertz"
+  },
+  "repository": "https://github.com/bobmaertz/prompt-library",
+  "license": "MIT",
+  "lspServers": "./.lsp.json"
+}

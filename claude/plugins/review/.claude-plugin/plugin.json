@@ -1,0 +1,11 @@
+{
+  "name": "review",
+  "description": "Peer review and security review agents that run as background tasks after code implementation. Designed to catch issues before commits.",
+  "version": "0.1.0",
+  "author": {
+    "name": "bobmaertz"
+  },
+  "repository": "https://github.com/bobmaertz/prompt-library",
+  "license": "MIT",
+  "hooks": "./hooks/hooks.json"
+}
