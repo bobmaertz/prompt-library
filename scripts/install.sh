@@ -2,8 +2,9 @@
 #
 # Claude Plugin Library Installer
 #
-# Installs plugins from this library into the Claude Code configuration directory
-# using symbolic links so changes sync back to the repository automatically.
+# Symlinks each plugin from plugins/ into ~/.claude/plugins/cache/ and registers
+# it in ~/.claude/settings.json, matching the Claude Code plugin installation
+# format described at https://code.claude.com/docs/en/plugins
 #
 
 set -e
@@ -15,11 +16,12 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Get the absolute path to the plugin library directory
 PLUGIN_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Default Claude Code configuration path
-CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.config/claude}"
+# Claude Code config root — all plugin state lives under ~/.claude/
+CLAUDE_DIR="${CLAUDE_DIR:-$HOME/.claude}"
+PLUGINS_CACHE_DIR="$CLAUDE_DIR/plugins/cache"
+SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 
 print_info()    { echo -e "${BLUE}i${NC} $1"; }
 print_success() { echo -e "${GREEN}+${NC} $1"; }
@@ -44,7 +46,6 @@ create_symlink() {
     target_dir=$(dirname "$target")
     if [ ! -d "$target_dir" ]; then
         mkdir -p "$target_dir"
-        print_info "Created directory: $target_dir"
     fi
 
     if [ -e "$target" ] || [ -L "$target" ]; then
@@ -57,7 +58,7 @@ create_symlink() {
             fi
         fi
         local backup="${target}.backup.$(date +%Y%m%d_%H%M%S)"
-        print_warning "$description exists, backing up to: $(basename "$backup")"
+        print_warning "$description already exists, backing up to $(basename "$backup")"
         mv "$target" "$backup"
     fi
 
@@ -65,7 +66,37 @@ create_symlink() {
     print_success "$description"
 }
 
-# Install all plugins found in the plugins/ directory
+# Add a plugin to the enabledPlugins list in ~/.claude/settings.json
+register_plugin() {
+    local plugin_name="$1"
+
+    # Create settings.json if it doesn't exist yet
+    if [ ! -f "$SETTINGS_FILE" ]; then
+        mkdir -p "$(dirname "$SETTINGS_FILE")"
+        echo '{}' > "$SETTINGS_FILE"
+    fi
+
+    python3 - "$SETTINGS_FILE" "$plugin_name" <<'PYEOF'
+import json, sys
+
+settings_file, plugin_name = sys.argv[1], sys.argv[2]
+
+with open(settings_file) as f:
+    settings = json.load(f)
+
+settings.setdefault('enabledPlugins', [])
+
+if any(p.get('name') == plugin_name for p in settings['enabledPlugins']):
+    sys.exit(0)  # already registered
+
+settings['enabledPlugins'].append({'name': plugin_name})
+
+with open(settings_file, 'w') as f:
+    json.dump(settings, f, indent=2)
+    f.write('\n')
+PYEOF
+}
+
 install_plugins() {
     print_header "Installing Claude Code Plugins"
 
@@ -76,6 +107,8 @@ install_plugins() {
         exit 1
     fi
 
+    mkdir -p "$PLUGINS_CACHE_DIR"
+
     local installed=0
 
     for plugin in "$plugins_dir"/*/; do
@@ -83,43 +116,15 @@ install_plugins() {
         local plugin_name
         plugin_name=$(basename "$plugin")
 
-        print_info "Installing plugin: $plugin_name"
+        # Symlink the entire plugin directory into the cache
+        create_symlink \
+            "${plugin%/}" \
+            "$PLUGINS_CACHE_DIR/$plugin_name" \
+            "plugin: $plugin_name"
 
-        # Install skills
-        if [ -d "$plugin/skills" ]; then
-            for skill in "$plugin/skills"/*/; do
-                [ -d "$skill" ] || continue
-                local skill_name
-                skill_name=$(basename "$skill")
-                create_symlink \
-                    "$skill" \
-                    "$CLAUDE_CONFIG_DIR/skills/$skill_name" \
-                    "  skill: $skill_name"
-            done
-        fi
-
-        # Install commands
-        if [ -d "$plugin/commands" ]; then
-            for command in "$plugin/commands"/*.md; do
-                [ -f "$command" ] || continue
-                local command_name
-                command_name=$(basename "$command")
-                create_symlink \
-                    "$command" \
-                    "$CLAUDE_CONFIG_DIR/commands/$command_name" \
-                    "  command: $command_name"
-            done
-        fi
-
-        # Install hooks.json into a per-plugin namespace
-        if [ -f "$plugin/hooks/hooks.json" ]; then
-            local hooks_dir="$CLAUDE_CONFIG_DIR/hooks/plugins"
-            mkdir -p "$hooks_dir"
-            create_symlink \
-                "$plugin/hooks/hooks.json" \
-                "$hooks_dir/$plugin_name.json" \
-                "  hooks: $plugin_name"
-        fi
+        # Register in ~/.claude/settings.json
+        register_plugin "$plugin_name"
+        print_info "  registered in $(basename "$SETTINGS_FILE")"
 
         installed=$((installed + 1))
     done
@@ -128,31 +133,24 @@ install_plugins() {
     print_success "Installed $installed plugin(s)"
 }
 
-# Print a summary of what was installed
 show_summary() {
     print_header "Installation Summary"
 
-    echo "Plugin library: $PLUGIN_LIB_DIR"
-    echo "Claude config:  $CLAUDE_CONFIG_DIR"
+    echo "Plugin library:  $PLUGIN_LIB_DIR/plugins"
+    echo "Plugin cache:    $PLUGINS_CACHE_DIR"
+    echo "Settings file:   $SETTINGS_FILE"
     echo ""
 
-    if [ -d "$CLAUDE_CONFIG_DIR/skills" ]; then
-        skill_count=$(find "$CLAUDE_CONFIG_DIR/skills" -maxdepth 1 -type l 2>/dev/null | wc -l | tr -d ' ')
-        echo "  Skills:   $skill_count symlinked"
-    fi
-    if [ -d "$CLAUDE_CONFIG_DIR/commands" ]; then
-        command_count=$(find "$CLAUDE_CONFIG_DIR/commands" -maxdepth 1 -type l 2>/dev/null | wc -l | tr -d ' ')
-        echo "  Commands: $command_count symlinked"
-    fi
-    if [ -d "$CLAUDE_CONFIG_DIR/hooks/plugins" ]; then
-        hook_count=$(find "$CLAUDE_CONFIG_DIR/hooks/plugins" -maxdepth 1 -type l 2>/dev/null | wc -l | tr -d ' ')
-        echo "  Hooks:    $hook_count plugin(s) symlinked"
-    fi
-
+    local count
+    count=$(find "$PLUGINS_CACHE_DIR" -maxdepth 1 -type l 2>/dev/null | wc -l | tr -d ' ')
+    echo "  Plugins installed: $count"
     echo ""
+
     print_success "Installation complete!"
     echo ""
-    print_info "Files edited in $CLAUDE_CONFIG_DIR automatically sync back to the repository."
+    print_info "Because the cache entries are symlinks, edits made through Claude Code"
+    print_info "sync back to this repository automatically."
+    print_info ""
     print_info "To push changes:"
     echo "  cd $PLUGIN_LIB_DIR"
     echo "  git add -A && git commit -m \"Update plugins\" && git push"
@@ -161,10 +159,13 @@ show_summary() {
 main() {
     print_header "Claude Plugin Library Installer"
 
-    echo "Source:  $PLUGIN_LIB_DIR/plugins"
-    echo "Target:  $CLAUDE_CONFIG_DIR"
+    echo "Each plugin will be symlinked into the Claude Code plugin cache and"
+    echo "registered in settings.json as an enabled plugin."
     echo ""
-    echo "Override the target path with: CLAUDE_CONFIG_DIR=/path ./scripts/install.sh"
+    echo "Plugin cache:  $PLUGINS_CACHE_DIR"
+    echo "Settings file: $SETTINGS_FILE"
+    echo ""
+    echo "Override with: CLAUDE_DIR=/path ./scripts/install.sh"
     echo ""
 
     read -r -p "Continue with installation? [Y/n] " REPLY

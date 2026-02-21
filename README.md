@@ -13,7 +13,7 @@ A collection of Claude Code plugins for everyday development workflows. Each plu
 
 ## Installation
 
-Clone the repository and run the installer. It creates symbolic links from your Claude Code config directory into this repo so edits sync back automatically.
+Clone the repository and run the installer. It symlinks each plugin into the Claude Code plugin cache and registers it in `~/.claude/settings.json`.
 
 ```bash
 git clone https://github.com/bobmaertz/prompt-library.git ~/.claude-plugins
@@ -21,18 +21,25 @@ cd ~/.claude-plugins
 ./scripts/install.sh
 ```
 
-The installer places each plugin's components into `~/.config/claude/`:
+Each plugin is installed as a symlink so edits made through Claude Code sync back to this repository automatically.
 
-| Component | Destination |
-|-----------|-------------|
-| Skills | `~/.config/claude/skills/<skill-name>/` |
-| Commands | `~/.config/claude/commands/<command-name>.md` |
-| Hooks | `~/.config/claude/hooks/plugins/<plugin-name>.json` |
+| What | Where |
+|------|-------|
+| Plugin symlinks | `~/.claude/plugins/cache/<plugin-name>` |
+| Settings registration | `~/.claude/settings.json` → `enabledPlugins` |
 
-Override the default config path:
+Override the default `~/.claude` path:
 
 ```bash
-CLAUDE_CONFIG_DIR=/custom/path ./scripts/install.sh
+CLAUDE_DIR=/custom/path ./scripts/install.sh
+```
+
+### Development / testing a single plugin
+
+To load a plugin for one session without installing it permanently:
+
+```bash
+claude --plugin-dir ./plugins/review
 ```
 
 ## Uninstallation
@@ -41,7 +48,7 @@ CLAUDE_CONFIG_DIR=/custom/path ./scripts/install.sh
 ./scripts/uninstall.sh
 ```
 
-Removes only the symlinks created by the installer. Backup files are left in place.
+Removes the cache symlinks and deregisters each plugin from `settings.json`. Backup files are left in place.
 
 ## Plugin Structure
 
