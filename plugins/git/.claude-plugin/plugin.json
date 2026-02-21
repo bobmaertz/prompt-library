@@ -1,0 +1,10 @@
+{
+  "name": "git",
+  "description": "Git workflow automation for Claude Code: context-aware commit message generation and worktree management for parallel agent workflows.",
+  "version": "1.0.0",
+  "author": {
+    "name": "bobmaertz"
+  },
+  "repository": "https://github.com/bobmaertz/prompt-library",
+  "license": "MIT"
+}

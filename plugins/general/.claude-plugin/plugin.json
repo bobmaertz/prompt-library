@@ -1,0 +1,10 @@
+{
+  "name": "general",
+  "description": "Core utilities for everyday Claude Code workflows: deep research with parallel sub-agents, repository exploration, documentation lookup and generation, and interactive CLI helpers via gum.",
+  "version": "1.0.0",
+  "author": {
+    "name": "bobmaertz"
+  },
+  "repository": "https://github.com/bobmaertz/prompt-library",
+  "license": "MIT"
+}

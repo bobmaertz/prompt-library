@@ -1,0 +1,11 @@
+{
+  "name": "review",
+  "description": "Code review agents for Claude Code: quick all-in-one review, deep peer review, and security review as background tasks. Includes a pre-commit hook that checks review status before allowing commits.",
+  "version": "1.0.0",
+  "author": {
+    "name": "bobmaertz"
+  },
+  "repository": "https://github.com/bobmaertz/prompt-library",
+  "license": "MIT",
+  "hooks": "./hooks/hooks.json"
+}

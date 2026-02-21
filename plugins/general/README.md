@@ -33,7 +33,9 @@ For interactive research with a gum-powered menu, run `scripts/gum-research.sh` 
 ## Files
 
 ```
-general-purpose/
+general/
+├── .claude-plugin/
+│   └── plugin.json           # Plugin manifest
 ├── commands/
 │   ├── research.md           # /research slash command
 │   ├── explore-repo.md       # /explore-repo slash command
@@ -48,5 +50,6 @@ general-purpose/
 ├── scripts/
 │   └── gum-research.sh       # Interactive gum-powered research launcher
 └── config/
-    └── gum.md                # Gum configuration and usage reference
+    ├── gum.md                # Gum configuration and usage reference
+    └── best-practices.md     # Development best practices reference
 ```

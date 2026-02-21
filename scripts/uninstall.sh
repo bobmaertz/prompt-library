@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# Prompt Library Uninstaller
+# Claude Plugin Library Uninstaller
 #
-# Removes symbolic links created by the installer.
-# Does not remove backup files.
+# Removes symbolic links created by install.sh.
+# Does not remove backup files created during installation.
 #
 
 set -e
@@ -15,29 +15,15 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Get the absolute path to the prompt library directory
-PROMPT_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Get the absolute path to the plugin library directory
+PLUGIN_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# Default installation paths
+# Default Claude Code configuration path
 CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.config/claude}"
-CURSOR_CONFIG_DIR="${CURSOR_CONFIG_DIR:-$HOME/.cursor}"
 
-# Function to print colored messages
-print_info() {
-    echo -e "${BLUE}ℹ${NC} $1"
-}
-
-print_success() {
-    echo -e "${GREEN}✓${NC} $1"
-}
-
-print_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}✗${NC} $1"
-}
+print_info()    { echo -e "${BLUE}i${NC} $1"; }
+print_success() { echo -e "${GREEN}+${NC} $1"; }
+print_warning() { echo -e "${YELLOW}!${NC} $1"; }
 
 print_header() {
     echo ""
@@ -47,15 +33,15 @@ print_header() {
     echo ""
 }
 
-# Function to remove symlink if it points to prompt library
+# Remove a symlink only if it points into this plugin library
 remove_symlink() {
     local link_path="$1"
     local description="$2"
 
     if [ -L "$link_path" ]; then
-        local target=$(readlink "$link_path")
-        # Check if the symlink points to our prompt library
-        if [[ "$target" == "$PROMPT_LIB_DIR"* ]]; then
+        local target
+        target=$(readlink "$link_path")
+        if [[ "$target" == "$PLUGIN_LIB_DIR"* ]]; then
             rm "$link_path"
             print_success "Removed: $description"
             return 0
@@ -69,7 +55,7 @@ remove_symlink() {
     fi
 }
 
-# Function to remove directory if empty
+# Remove a directory if it is empty
 remove_if_empty() {
     local dir_path="$1"
     if [ -d "$dir_path" ] && [ -z "$(ls -A "$dir_path")" ]; then
@@ -78,149 +64,89 @@ remove_if_empty() {
     fi
 }
 
-# Function to uninstall Claude Code resources
-uninstall_claude() {
-    print_header "Uninstalling Claude Code Resources"
+uninstall_plugins() {
+    print_header "Uninstalling Claude Code Plugins"
 
     local removed=0
 
-    # Remove skills
+    # Remove skill symlinks
     if [ -d "$CLAUDE_CONFIG_DIR/skills" ]; then
-        for skill_link in "$CLAUDE_CONFIG_DIR/skills"/*; do
-            if [ -e "$skill_link" ] || [ -L "$skill_link" ]; then
-                skill_name=$(basename "$skill_link")
-                if remove_symlink "$skill_link" "Skill: $skill_name"; then
-                    ((removed++))
-                fi
+        for link in "$CLAUDE_CONFIG_DIR/skills"/*; do
+            [ -e "$link" ] || [ -L "$link" ] || continue
+            if remove_symlink "$link" "skill: $(basename "$link")"; then
+                removed=$((removed + 1))
             fi
         done
         remove_if_empty "$CLAUDE_CONFIG_DIR/skills"
     fi
 
-    # Remove commands
+    # Remove command symlinks
     if [ -d "$CLAUDE_CONFIG_DIR/commands" ]; then
-        for command_link in "$CLAUDE_CONFIG_DIR/commands"/*; do
-            if [ -e "$command_link" ] || [ -L "$command_link" ]; then
-                command_name=$(basename "$command_link")
-                if remove_symlink "$command_link" "Command: $command_name"; then
-                    ((removed++))
-                fi
+        for link in "$CLAUDE_CONFIG_DIR/commands"/*; do
+            [ -e "$link" ] || [ -L "$link" ] || continue
+            if remove_symlink "$link" "command: $(basename "$link")"; then
+                removed=$((removed + 1))
             fi
         done
         remove_if_empty "$CLAUDE_CONFIG_DIR/commands"
     fi
 
-    # Remove hooks
-    if [ -d "$CLAUDE_CONFIG_DIR/hooks" ]; then
-        for hook_link in "$CLAUDE_CONFIG_DIR/hooks"/*; do
-            if [ -e "$hook_link" ] || [ -L "$hook_link" ]; then
-                hook_name=$(basename "$hook_link")
-                if remove_symlink "$hook_link" "Hook: $hook_name"; then
-                    ((removed++))
-                fi
+    # Remove plugin hook symlinks
+    if [ -d "$CLAUDE_CONFIG_DIR/hooks/plugins" ]; then
+        for link in "$CLAUDE_CONFIG_DIR/hooks/plugins"/*; do
+            [ -e "$link" ] || [ -L "$link" ] || continue
+            if remove_symlink "$link" "hooks: $(basename "$link")"; then
+                removed=$((removed + 1))
             fi
         done
+        remove_if_empty "$CLAUDE_CONFIG_DIR/hooks/plugins"
         remove_if_empty "$CLAUDE_CONFIG_DIR/hooks"
     fi
 
-    # Remove prompts directory link
-    if remove_symlink "$CLAUDE_CONFIG_DIR/prompts" "Prompts directory"; then
-        ((removed++))
-    fi
-
-    if [ $removed -eq 0 ]; then
-        print_info "No Claude Code symlinks found to remove"
+    if [ "$removed" -eq 0 ]; then
+        print_info "No symlinks found to remove"
     fi
 }
 
-# Function to uninstall Cursor resources
-uninstall_cursor() {
-    print_header "Uninstalling Cursor Resources"
-
-    local removed=0
-
-    # Remove rules
-    if [ -d "$CURSOR_CONFIG_DIR/rules" ]; then
-        for rule_link in "$CURSOR_CONFIG_DIR/rules"/*; do
-            if [ -e "$rule_link" ] || [ -L "$rule_link" ]; then
-                rule_name=$(basename "$rule_link")
-                if remove_symlink "$rule_link" "Rule: $rule_name"; then
-                    ((removed++))
-                fi
-            fi
-        done
-        remove_if_empty "$CURSOR_CONFIG_DIR/rules"
-    fi
-
-    # Remove prompts directory link
-    if remove_symlink "$CURSOR_CONFIG_DIR/prompts" "Prompts directory"; then
-        ((removed++))
-    fi
-
-    if [ $removed -eq 0 ]; then
-        print_info "No Cursor symlinks found to remove"
-    fi
-}
-
-# Function to show uninstallation summary
 show_summary() {
     print_header "Uninstallation Summary"
 
-    echo "Removed all symlinks pointing to: $PROMPT_LIB_DIR"
+    echo "Removed all symlinks pointing to: $PLUGIN_LIB_DIR"
     echo ""
 
-    # Check for backup files
-    local claude_backups=$(find "$CLAUDE_CONFIG_DIR" -name "*.backup.*" 2>/dev/null | wc -l)
-    local cursor_backups=$(find "$CURSOR_CONFIG_DIR" -name "*.backup.*" 2>/dev/null | wc -l)
+    local backups
+    backups=$(find "$CLAUDE_CONFIG_DIR" -name "*.backup.*" 2>/dev/null | wc -l | tr -d ' ')
 
-    if [ $claude_backups -gt 0 ] || [ $cursor_backups -gt 0 ]; then
-        print_warning "Backup files were left in place:"
-        if [ $claude_backups -gt 0 ]; then
-            echo "  Claude: $claude_backups backup(s) in $CLAUDE_CONFIG_DIR"
-        fi
-        if [ $cursor_backups -gt 0 ]; then
-            echo "  Cursor: $cursor_backups backup(s) in $CURSOR_CONFIG_DIR"
-        fi
-        echo ""
-        print_info "You can manually review and remove these backups if desired."
+    if [ "$backups" -gt 0 ]; then
+        print_warning "$backups backup file(s) were left in place in $CLAUDE_CONFIG_DIR"
+        print_info "Review and remove them manually when ready."
     fi
 
     echo ""
     print_success "Uninstallation complete!"
     echo ""
-    print_info "The prompt library repository at $PROMPT_LIB_DIR"
-    print_info "has not been modified and can be safely deleted if desired."
+    print_info "The repository at $PLUGIN_LIB_DIR has not been modified."
 }
 
-# Main uninstallation
 main() {
-    print_header "Prompt Library Uninstaller"
+    print_header "Claude Plugin Library Uninstaller"
 
-    echo "This will remove all symbolic links pointing to the prompt library."
-    echo "Source: $PROMPT_LIB_DIR"
+    echo "This will remove all symlinks pointing to the plugin library."
+    echo "Source: $PLUGIN_LIB_DIR"
+    echo "Target: $CLAUDE_CONFIG_DIR"
     echo ""
-    echo "Target directories:"
-    echo "  Claude: $CLAUDE_CONFIG_DIR"
-    echo "  Cursor: $CURSOR_CONFIG_DIR"
-    echo ""
-    echo "Note: Backup files will be preserved."
+    echo "Backup files will be preserved."
     echo ""
 
-    # Ask for confirmation
-    read -p "Continue with uninstallation? [Y/n] " -n 1 -r
+    read -r -p "Continue with uninstallation? [Y/n] " REPLY
     echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! -z $REPLY ]]; then
+    if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ -n $REPLY ]]; then
         print_warning "Uninstallation cancelled"
         exit 0
     fi
 
-    # Uninstall resources
-    uninstall_claude
-    uninstall_cursor
-
-    # Show summary
+    uninstall_plugins
     show_summary
 }
 
-# Run main function
 main "$@"

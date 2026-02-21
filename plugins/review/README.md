@@ -4,10 +4,11 @@ Peer review and security review agents designed to run as background tasks after
 
 ## Commands
 
-| Command | Invocation | Description |
-|---------|-----------|-------------|
-| `peer-review` | `/peer-review` or `/code-review:peer-review` | Run a peer review on recent changes as a background agent |
-| `security-review` | `/security-review` or `/code-review:security-review` | Run a security-focused review as a background agent |
+| Command | Description |
+|---------|-------------|
+| `/review` | Quick all-in-one review covering quality, security, best practices, and performance |
+| `/peer-review` | Deep peer review on recent changes, run as a background agent |
+| `/security-review` | Security-focused review (OWASP Top 10 and vulnerabilities), run as a background agent |
 
 ## Skills
 
