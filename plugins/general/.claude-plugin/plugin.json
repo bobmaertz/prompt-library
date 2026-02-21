@@ -1,0 +1,11 @@
+{
+  "name": "general",
+  "description": "General-purpose Claude Code plugin: research, repository exploration, documentation generation, code review agents, security review, git commit generation, and git worktree management.",
+  "version": "0.1.0",
+  "author": {
+    "name": "bobmaertz"
+  },
+  "repository": "https://github.com/bobmaertz/prompt-library",
+  "license": "MIT",
+  "hooks": "./hooks/hooks.json"
+}
