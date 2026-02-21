@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "A task has just been marked complete. If this task involved writing or modifying source code files (not documentation, configuration, or research only), invoke the peer-reviewer skill to review the changes before proceeding. Do not invoke for tasks that only updated README files, comments, or configuration with no logic changes. If peer review is warranted, run it now as a background agent.",
+            "prompt": "A task has just been marked complete. Evaluate the changes made:\n\n1. PEER REVIEW: If this task wrote or modified source code files (not documentation, configuration, or research only), invoke the peer-reviewer skill as a background agent to review the changes.\n\n2. TEST COVERAGE: If the task added new functions, classes, or modules and no corresponding test file was written as part of the same task, note that tests may be missing and remind the user they can run /gen-tests to generate coverage for the new code.\n\nDo not invoke for tasks that only updated README files, comments, configuration, spec files, or plan files with no logic changes. If peer review is warranted, run it now as a background agent.",
             "timeout": 120
           }
         ]
@@ -18,8 +18,20 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Check if the Bash command about to run is a git commit command (contains 'git commit'). If it is, verify whether a peer-review has been completed for the staged changes in this session. If a peer-review finding was produced and showed Critical or Major issues that have not been addressed, block the commit and explain which findings need resolution first. If review was clean, approved, or not yet run (in which case remind the user to run /peer-review), allow the commit. Respond with either 'ALLOW' or 'BLOCK' followed by a brief explanation, in the format: DECISION: <ALLOW|BLOCK> - <reason>.",
+            "prompt": "Check if the Bash command about to run is a git commit command (contains 'git commit'). If it is, verify two things:\n\n1. PEER REVIEW: Has a peer-review been completed for the staged changes in this session? If a peer-review showed Critical or Major issues that have not been addressed, block the commit and list the unresolved findings.\n\n2. SECURITY: If the staged changes touch authentication, authorization, user input handling, database queries, cryptography, or external APIs and no security-review has been run this session, add a reminder that the user can run /security-review before committing (but do not block for this reason alone).\n\nIf peer review was clean, approved, or not yet run (in which case remind the user to run /peer-review), allow the commit. Respond in the format: DECISION: <ALLOW|BLOCK> - <reason>.",
             "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "A file was just written. If the file is a new source code file (not a test file, not a spec, not documentation, not configuration, not a plan file like MULTI_AGENT_PLAN.md) and it contains function or class definitions, add a brief inline note: 'Tip: run /gen-tests to generate test coverage for this file.' Only trigger for new source files with substantive logic — not for edits to existing files, not for test files, not for markdown or config files.",
+            "timeout": 10
           }
         ]
       }
