@@ -6,6 +6,5 @@
     "name": "bobmaertz"
   },
   "repository": "https://github.com/bobmaertz/prompt-library",
-  "license": "MIT",
-  "hooks": "./hooks/hooks.json"
+  "license": "MIT"
 }
