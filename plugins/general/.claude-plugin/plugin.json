@@ -1,7 +1,7 @@
 {
   "name": "general",
   "description": "General-purpose Claude Code plugin: orchestrator-worker pipeline (/spec → /plan → /implement), parallel review agents (peer-review, security-review), test generation (/gen-tests), targeted refactoring (/refactor), research, repository exploration, documentation, git commit generation, and git worktree management.",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": {
     "name": "bobmaertz"
   },
