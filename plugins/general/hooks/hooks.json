@@ -24,17 +24,5 @@
         ]
       }
     ],
-    "PostToolUse": [
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "prompt",
-            "prompt": "A file was just written. If the file is a new source code file (not a test file, not a spec, not documentation, not configuration, not a plan file like MULTI_AGENT_PLAN.md) and it contains function or class definitions, add a brief inline note: 'Tip: run /gen-tests to generate test coverage for this file.' Only trigger for new source files with substantive logic — not for edits to existing files, not for test files, not for markdown or config files.",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
   }
 }
