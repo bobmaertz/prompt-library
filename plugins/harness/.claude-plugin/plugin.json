@@ -1,7 +1,7 @@
 {
   "name": "harness",
   "description": "Long-running application development harness for Claude Code: initializer agent to decompose goals into a tracked feature list, incremental coding agent to make per-session progress, and an evaluator agent to assess quality through a generator-evaluator loop.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "bobmaertz"
   },

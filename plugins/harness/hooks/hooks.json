@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "The coding agent is about to stop. Check the harness handoff state and decide whether to allow or block.\n\nCheck these three things in order:\n\n1. IN-PROGRESS FEATURES: Read feature_list.json (if it exists). Are any features currently marked as 'in_progress'? If yes, block — the agent must either mark them 'passing' (if done and verified) or 'blocked' (with a note) before stopping. A feature must never be left as 'in_progress' at session end.\n\n2. PROGRESS LOG: Read claude-progress.txt (if it exists). Does it contain an entry for the current session? Look for a '## Session N' block added during this session that includes a summary and 'Next session should:' guidance. If the file exists but has no entry for this session's work (and changes were made in this session), block — the agent must write the session entry before stopping.\n\n3. WORKING TREE: Check if feature_list.json or claude-progress.txt has uncommitted changes (git status). If either has unstaged or uncommitted changes, block — the agent must commit the harness artifacts before stopping.\n\nIf none of these issues are present, or if no harness files exist yet (harness not initialized), allow the stop.\n\nRespond in the format: DECISION: <ALLOW|BLOCK> - <reason>. If blocking, be specific about exactly what needs to be done.",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Check if the Bash command about to run is a git commit command (contains 'git commit'). If it is not a git commit command, respond DECISION: ALLOW - not a commit.\n\nIf it is a git commit command, check the staged files (git diff --name-only --cached). If any non-harness source files are staged (i.e., files other than feature_list.json, claude-progress.txt, init.sh, HARNESS_EVAL_REPORT.md), verify that feature_list.json is also staged.\n\nIf source files are staged but feature_list.json is NOT staged, block the commit. The coding agent must update the status of the implemented feature in feature_list.json to 'passing' and stage it before committing.\n\nIf feature_list.json is staged alongside source files, or if only harness files are being committed, allow it.\n\nAlso check that commits for individual features follow the pattern 'feat(F00N): <title>'. If the commit message doesn't match and source files are staged, add a reminder (but do not block for this reason alone).\n\nRespond in the format: DECISION: <ALLOW|BLOCK> - <reason>.",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Context compaction is about to occur. If harness files exist in this project (feature_list.json or claude-progress.txt), the agent must write a checkpoint to claude-progress.txt before compaction proceeds — otherwise the current session's progress context will be lost and the next agent will have no record of what was done.\n\nCheck: does claude-progress.txt exist and does it have an entry for the current session's in-progress work? If it exists but the current session's work is not yet logged, block compaction and instruct the agent to: (1) append a checkpoint entry to claude-progress.txt noting features completed so far this session, current in-progress feature if any, and what to do next, (2) commit the checkpoint with 'git add claude-progress.txt feature_list.json && git commit -m \"harness: progress checkpoint before compaction\"'.\n\nIf the progress log is up to date, or if no harness files exist, allow compaction.\n\nRespond in the format: DECISION: <ALLOW|BLOCK> - <reason>.",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
