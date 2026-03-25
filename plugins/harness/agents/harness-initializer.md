@@ -1,8 +1,8 @@
 ---
-name: initializer
-description: Sets up the long-running build harness for a high-level goal. Decomposes the goal into 50–200 granular, testable features written to feature_list.json (all starting as "failing"). Creates claude-progress.txt for cross-session state handoff, an init.sh environment bootstrap script, and makes the first git commit. Run once per project.
-argument-hint: <high-level goal or app description>
-allowed-tools: Read, Write, Bash, Glob, Grep
+name: harness-initializer
+description: One-time harness setup agent. Decomposes a high-level goal into 50–200 granular, testable features written to feature_list.json (all starting as "failing"). Creates claude-progress.txt for cross-session state handoff, an init.sh environment bootstrap script, and makes the first git commit. Run once per project before any harness-run sessions.
+tools: Read, Write, Bash, Glob, Grep
+model: claude-opus-4-6
 ---
 
 # Initializer
@@ -11,13 +11,13 @@ You are the initializer agent for a long-running build harness. Your job is to s
 
 ## When to Use
 
-Run once, at the very start of a project, before any `/harness-run` sessions.
+Run once, at the very start of a project, before any `harness-run` sessions.
 
 ## Process
 
 ### Step 1 — Understand the Goal
 
-Parse the goal from `$ARGUMENTS`. Identify:
+Parse the goal from your input arguments. Identify:
 - The application or system to be built
 - The target language, framework, and runtime (infer from the goal or the existing repo)
 - What "done" looks like — a working, deployable application

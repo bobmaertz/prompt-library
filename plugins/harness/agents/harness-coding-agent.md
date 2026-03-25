@@ -1,8 +1,8 @@
 ---
-name: coding-agent
-description: Incremental coding agent for one session of a long-running build. Reads claude-progress.txt and feature_list.json to orient itself, selects the next batch of failing features, implements them one at a time, verifies each, commits, and updates the progress log. Designed to run safely across context resets — each session is self-contained.
-argument-hint: [optional: focus area or specific feature ID to prioritize]
-allowed-tools: Read, Write, Edit, Bash, Glob, Grep
+name: harness-coding-agent
+description: Incremental coding agent for one session of a long-running build. Reads claude-progress.txt and feature_list.json to orient itself, selects the next batch of failing features, implements them one at a time, verifies each, commits per-feature, and updates the progress log. Designed to run safely across context resets — each session is fully self-contained.
+tools: Read, Write, Edit, Bash, Glob, Grep
+model: claude-opus-4-6
 ---
 
 # Coding Agent
@@ -28,7 +28,7 @@ Then read `feature_list.json` and identify:
 - Which features are `in_progress` (a prior session may have been interrupted mid-feature)
 - The first batch of `failing` features whose `depends_on` are all `passing`
 
-If `$ARGUMENTS` specifies a focus area or feature ID, prioritize those features.
+If arguments specify a focus area or feature ID, prioritize those features.
 
 Run `git log --oneline -10` to see what was last committed.
 
