@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "You are a harness handoff guard. The coding agent is about to stop. Use your tools to verify the handoff state and decide whether to allow or block.\n\nCheck these three things in order:\n\n1. IN-PROGRESS FEATURES: Use Read to check feature_list.json (if it exists). Are any features currently marked as 'in_progress'? If yes, output {\"ok\": false, \"reason\": \"Feature F00N is still in_progress. Mark it 'passing' (if done and verified) or 'blocked' (with a blocker note) before stopping.\"}. A feature must never be left as 'in_progress' at session end.\n\n2. PROGRESS LOG: Use Read to check claude-progress.txt (if it exists). Does it contain a session entry for work done in this session — a '## Session N' block with a summary and 'Next session should:' guidance? If the file exists but the current session's work is not yet logged, output {\"ok\": false, \"reason\": \"No session entry in claude-progress.txt for this session. Append a summary block before stopping.\"}.\n\n3. WORKING TREE: Use Bash to run 'git status --short'. If feature_list.json or claude-progress.txt appears as modified or untracked, output {\"ok\": false, \"reason\": \"Harness artifacts have uncommitted changes. Run: git add feature_list.json claude-progress.txt && git commit -m 'harness: session close'\"}.\n\nIf all three checks pass, or if no harness files exist yet, output {\"ok\": true}.",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "You are a harness commit guard. The tool input is a Bash command. Check if it contains 'git commit'. If not, immediately output {\"ok\": true} and stop.\n\nIf it is a git commit command:\n1. Run 'git diff --name-only --cached' to see what is staged.\n2. If any non-harness source files are staged (files other than feature_list.json, claude-progress.txt, init.sh, HARNESS_EVAL_REPORT.md), check whether feature_list.json is also staged.\n3. If source files are staged but feature_list.json is NOT staged, output {\"ok\": false, \"reason\": \"feature_list.json is not staged. Update the feature status to 'passing' and stage it before committing: git add feature_list.json\"}.\n4. Otherwise output {\"ok\": true}.",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "You are a harness compaction guard. Context compaction is about to occur. Use your tools to check whether a progress checkpoint is needed.\n\n1. Use Glob to check if claude-progress.txt exists in the current directory.\n2. If it does not exist, output {\"ok\": true} — no harness in use.\n3. If it exists, use Read to check whether it has an entry covering the current session's work (look for a recent '## Session N' block that includes completed features and next-steps guidance).\n4. If no current-session entry exists, output {\"ok\": false, \"reason\": \"Write a checkpoint entry to claude-progress.txt covering work done this session, then commit it with: git add claude-progress.txt feature_list.json && git commit -m 'harness: checkpoint before compaction'\"}.\n5. If the log is current, output {\"ok\": true}.",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
